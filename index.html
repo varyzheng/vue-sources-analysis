@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue-Sources-Analysis</title>
+</head>
+<body>
+  <div id="app">
+    <h1 class="title">标题: this.message</h1>
+    <div class="message">插值表达式: {{ message }}</div>
+    <div>v-text name: <span v-text="message"></span></div>
+    修改message: <input v-model="message" id="input"/>
+  </div>
+</body>
+<script>
+  var app = new Vue({
+  el: document.querySelector('#app'),
+  data: {
+    message: 'Hello Vue!',
+  }
+})
+</script>
+</html>
