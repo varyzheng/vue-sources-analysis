@@ -25,6 +25,8 @@ module.exports = {
   rules: {
     'import/extensions': 0,
     '@typescript-eslint/no-var-requires': 0,
+    'no-underscore-dangle': 0,
+    'no-param-reassign': 0,
   },
   settings: {
     'import/resolver': {
