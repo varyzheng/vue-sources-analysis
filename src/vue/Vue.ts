@@ -1,3 +1,5 @@
+import Watcher from './Watcher';
+
 interface VueOptions {
   el: string|Node,
   data?: {
@@ -11,6 +13,10 @@ export default class Vue {
 
   $data: {
     [key:string]: any,
+  }
+
+  $mapping: {
+    [key:string]: Watcher[],
   }
 
   constructor(options: VueOptions) {
@@ -29,6 +35,7 @@ export default class Vue {
     }
     this.$el = target;
     this.$data = data || {};
+    this.$mapping = {};
     this._render(this.$el);
   }
 
@@ -38,8 +45,11 @@ export default class Vue {
       children.forEach((child) => {
         this._render(child);
       });
-      return;
     }
+    this._renderNode(ele);
+  }
+
+  _renderNode(ele: Node): void {
     // 文本节点
     if (ele.nodeType === 3) {
       this._renderTextNode(ele);
@@ -62,7 +72,14 @@ export default class Vue {
       const result = textContent.match(regExp);
       if (result) {
         // 将{{ key }}替换为相应的值
-        textContent = textContent.replace(result[0], this.$data[result[1].trim()]);
+        const key = result[1].trim();
+        if (key) {
+          const originTextContent = textContent || '';
+          this._addDependency(key, new Watcher(() => {
+            ele.textContent = originTextContent.replace(result[0], this.$data[key]);
+          }));
+          textContent = originTextContent.replace(result[0], this.$data[key]);
+        }
       }
       ele.textContent = textContent;
     }
@@ -103,15 +120,41 @@ export default class Vue {
       // v-text
       case 'text':
         ele.textContent = value;
+        this._addDependency(key, new Watcher(() => {
+          ele.textContent = this.$data[key];
+        }));
         break;
       // v-model
       case 'model':
         if (ele instanceof HTMLInputElement) {
           ele.value = value;
+          ele.addEventListener('change', () => {
+            this.$data[key] = ele.value;
+            this._notify(key);
+          });
+          this._addDependency(key, new Watcher(() => {
+            ele.value = this.$data[key];
+          }));
         }
         break;
       default:
         break;
     }
+  }
+
+  _addDependency(key: string, watcher: Watcher): void {
+    const mappingArray = this.$mapping[key];
+    if (mappingArray && mappingArray.length) {
+      mappingArray.push(watcher);
+    } else {
+      this.$mapping[key] = [watcher];
+    }
+  }
+
+  _notify(key: string): void {
+    const dependencies = this.$mapping[key];
+    dependencies.forEach((watcher) => {
+      watcher.task();
+    });
   }
 }

@@ -15,10 +15,16 @@
 </body>
 <script>
   var app = new Vue({
-  el: document.querySelector('#app'),
-  data: {
-    message: 'Hello Vue!',
-  }
-})
+    el: document.querySelector('#app'),
+    data: {
+      message: 'Hello Vue!',
+    }
+  });
+  var time = 0;
+  setInterval(() => {
+    time += 30;
+    app.$data.message = `${time}s 过去了`;
+    app._notify('message');
+  }, 30000);
 </script>
 </html>
