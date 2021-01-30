@@ -11,6 +11,7 @@
     <div class="message">插值表达式: {{ message }}</div>
     <div>v-text name: <span v-text="message"></span></div>
     修改message: <input v-model="message" id="input"/>
+    <div v-html="html" v-on:click="clickHandler"></div>
   </div>
 </body>
 <script>
@@ -18,6 +19,12 @@
     el: document.querySelector('#app'),
     data: {
       message: 'Hello Vue!',
+      html: '<strong style="color:#f0f;">这是一段HTML，点击我</strong>'
+    },
+    methods: {
+      clickHandler () {
+        alert('被点击了')
+      },
     }
   });
   var time = 0;

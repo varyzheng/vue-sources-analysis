@@ -5,6 +5,10 @@ interface VueOptions {
   data?: {
     [key:string]: any,
   },
+  methods: {
+    [key:string]: () => void,
+
+  }
 }
 
 const getDirect = (nodeName: string): string => nodeName.slice(2);
@@ -19,9 +23,13 @@ export default class Vue {
     [key:string]: Watcher[],
   }
 
+  $methods: {
+    [key:string]: () => void,
+  }
+
   constructor(options: VueOptions) {
     const {
-      el, data,
+      el, data, methods,
     } = options;
     let target;
     if (typeof el === 'string') {
@@ -35,6 +43,7 @@ export default class Vue {
     }
     this.$el = target;
     this.$data = data || {};
+    this.$methods = methods || {};
     this.$mapping = {};
     this._render(this.$el);
   }
@@ -136,6 +145,15 @@ export default class Vue {
             ele.value = this.$data[key];
           }));
         }
+        break;
+      case 'html':
+        ele.innerHTML = value;
+        break;
+      case 'on:click':
+        // 监听事件时，value是undefined，key为clickHandler
+        ele.addEventListener('click', () => {
+          this.$methods[key].call(this);
+        });
         break;
       default:
         break;
